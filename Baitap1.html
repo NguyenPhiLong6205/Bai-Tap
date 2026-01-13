@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Cyberpunk Login System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Orbitron', sans-serif;
+}
+
+body{
+    height:100vh;
+    background:
+        radial-gradient(circle at top,#ff00ff20,#000),
+        linear-gradient(135deg,#050505,#0a0a0a);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#fff;
+    overflow:hidden;
+}
+
+#matrix{
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    background: #000;
+}
+
+.container{
+    width:460px;
+    background:rgba(10,10,10,0.85);
+    border:2px solid #00fff7;
+    border-radius:16px;
+    padding:40px;
+    box-shadow:
+        0 0 30px #00fff7,
+        inset 0 0 20px #ff00ff40;
+    animation: neonPulse 3s infinite;
+    position: relative; /* ensure container sits above the canvas */
+    z-index: 1;
+}
+
+@keyframes neonPulse{
+    0%,100%{box-shadow:0 0 30px #00fff7}
+    50%{box-shadow:0 0 60px #ff00ff}
+}
+
+h2{
+    text-align:center;
+    margin-bottom:30px;
+    color:#00fff7;
+    letter-spacing:3px;
+    text-shadow:0 0 10px #00fff7;
+}
+
+.input-box{
+    margin-bottom:18px;
+}
+
+.input-box input{
+    width:100%;
+    padding:14px;
+    background:#000;
+    border:2px solid #00fff7;
+    border-radius:10px;
+    color:#00fff7;
+    outline:none;
+    transition:0.3s;
+}
+
+.input-box input::placeholder{
+    color:#00fff780;
+}
+
+.input-box input:focus{
+    box-shadow:0 0 15px #00fff7;
+}
+
+.btn{
+    width:100%;
+    padding:14px;
+    background:linear-gradient(135deg,#00fff7,#ff00ff);
+    border:none;
+    border-radius:30px;
+    font-weight:800;
+    color:#000;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.btn:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 25px #ff00ff;
+}
+
+.switch{
+    margin-top:20px;
+    text-align:center;
+    font-size:13px;
+}
+
+.switch span{
+    color:#ff00ff;
+    cursor:pointer;
+}
+
+.social{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    margin-top:25px;
+}
+
+.social a{
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    border:2px solid #00fff7;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#00fff7;
+    transition:0.3s;
+}
+
+.social a:hover{
+    background:#00fff7;
+    color:#000;
+    box-shadow:0 0 15px #00fff7;
+}
+
+.hidden{
+    display:none;
+}
+
+.alert{
+    margin-top:15px;
+    text-align:center;
+    font-size:13px;
+}
+.success{color:#00ff88}
+.error{color:#ff0055}
+</style>
+</head>
+
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="container">
+
+<!-- LOGIN -->
+<div id="loginForm">
+    <h2>CYBER LOGIN</h2>
+
+    <div class="input-box">
+        <input type="text" id="loginUser" placeholder="Tên đăng nhập">
+    </div>
+
+    <div class="input-box">
+        <input type="password" id="loginPass" placeholder="Mật khẩu">
+    </div>
+
+    <button class="btn" onclick="login()">ĐĂNG NHẬP</button>
+
+    <div class="alert" id="loginAlert"></div>
+
+    <div class="social">
+        <a href="https://web.facebook.com/?_rdc=1&_rdr#" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+        <a href="https://x.com/?lang=vi" target="_blank" rel="noopener noreferrer"><i class="fab fa-x-twitter"></i></a>
+        <a href="https://github.com/" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
+        <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+    </div>
+
+    <div class="switch">
+        Chưa có tài khoản? <span onclick="showRegister()">Tạo tài khoản</span>
+    </div>
+</div>
+
+<!-- REGISTER -->
+<div id="registerForm" class="hidden">
+    <h2>REGISTER</h2>
+
+    <div class="input-box">
+        <input type="text" id="regUser" placeholder="Tên đăng nhập">
+    </div>
+
+    <div class="input-box">
+        <input type="password" id="regPass" placeholder="Mật khẩu">
+    </div>
+
+    <div class="input-box">
+        <input type="text" id="regPhone" placeholder="Số điện thoại">
+    </div>
+
+    <button class="btn" onclick="register()">TẠO TÀI KHOẢN</button>
+
+    <div class="switch">
+        Đã có tài khoản? <span onclick="showLogin()">Đăng nhập</span>
+    </div>
+</div>
+
+</div>
+
+<script>
+// TÀI KHOẢN MẶC ĐỊNH
+localStorage.setItem("Nguyễn Long", JSON.stringify({
+    password:"622005",
+    phone:"0123456789"
+}));
+
+function showRegister(){
+    loginForm.classList.add("hidden");
+    registerForm.classList.remove("hidden");
+}
+
+function showLogin(){
+    registerForm.classList.add("hidden");
+    loginForm.classList.remove("hidden");
+}
+
+function register(){
+    if(!regUser.value || !regPass.value || !regPhone.value){
+        alert("Vui lòng nhập đầy đủ thông tin!");
+        return;
+    }
+    localStorage.setItem(regUser.value, JSON.stringify({
+        password:regPass.value,
+        phone:regPhone.value
+    }));
+    alert("Tạo tài khoản thành công!");
+    showLogin();
+}
+
+function login(){
+    const alertBox = document.getElementById("loginAlert");
+    const data = localStorage.getItem(loginUser.value);
+
+    if(!data){
+        alertBox.innerHTML="❌ Tài khoản không tồn tại";
+        alertBox.className="alert error";
+        return;
+    }
+
+    if(JSON.parse(data).password === loginPass.value){
+        alertBox.innerHTML="✅ Đăng nhập thành công!";
+        alertBox.className="alert success";
+    }else{
+        alertBox.innerHTML="❌ Sai mật khẩu!";
+        alertBox.className="alert error";
+    }
+}
+
+// MATRIX / HACKER BACKGROUND ANIMATION
+(function(){
+    const canvas = document.getElementById('matrix');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    function resize(){
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        cols = Math.floor(canvas.width / fontSize) + 1;
+        drops = new Array(cols).fill(1);
+    }
+
+    const fontSize = 16;
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*()[]{}<>\/|:;';
+    let cols = Math.floor(window.innerWidth / fontSize) + 1;
+    let drops = new Array(cols).fill(1);
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    function draw(){
+        // translucent background to create trail effect
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.07)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#39ff14'; // neon green
+        ctx.font = fontSize + 'px monospace';
+
+        for(let i = 0; i < drops.length; i++){
+            const text = chars.charAt(Math.floor(Math.random() * chars.length));
+            const x = i * fontSize;
+            const y = drops[i] * fontSize;
+            ctx.fillText(text, x, y);
+
+            if(y > canvas.height && Math.random() > 0.975){
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+        requestAnimationFrame(draw);
+    }
+
+    // start with a black canvas
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    requestAnimationFrame(draw);
+})();
+</script>
+
+</body>
+</html>
